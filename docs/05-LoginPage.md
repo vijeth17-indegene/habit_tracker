@@ -1,18 +1,10 @@
+## 1) 
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {loginSchema, type LoginFormValues} from "../lib/schemas/auth";
 import { supabase } from "../lib/supabase";
-import { Link, useNavigate } from "react-router";
-
-import {
-  mainClassName,
-  mainHeading,
-  labelClassName,
-  inputClassName,
-  errorMessage,
-  serverErrorMessage,
-  submitButton
-} from "../lib/authStyles";
+import { useNavigate } from "react-router";
 
 
 export default function LoginPage() {
@@ -41,13 +33,12 @@ export default function LoginPage() {
   }
 
   return (
-    <main className={mainClassName}>
-      <h1 className={mainHeading}>Login</h1>
+    <main>
+      <h1>Login</h1>
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-5">
-          <label className={labelClassName} htmlFor="email">Email</label>
+          <label htmlFor="email">Email</label>
             <input
-              className={inputClassName}
               id="email"
               type="email"
               autoComplete="email"
@@ -55,12 +46,11 @@ export default function LoginPage() {
               aria-describedby={errors.email ? "email-error" : undefined}
               {...register("email")}
             />
-            {errors.email && <p className={errorMessage} id="email-error">{errors.email.message}</p>}
+            {errors.email && <p id="email-error">{errors.email.message}</p>}
         </div>
         <div className="mb-5">
-          <label className={labelClassName} htmlFor="password">Password</label>
+          <label htmlFor="password">Password</label>
             <input
-              className={inputClassName}
               id="password"
               type="password"
               autoComplete="current-password"
@@ -68,21 +58,30 @@ export default function LoginPage() {
               aria-describedby={errors.password ? "password-error" : undefined}
               {...register("password")}
             />
-            {errors.password && <p className={errorMessage} id="password-error">{errors.password.message}</p>}
+            {errors.password && <p id="password-error">{errors.password.message}</p>}
         </div>
         {errors.root?.server && (
-          <p className={serverErrorMessage} role="alert">{errors.root.server.message}</p>
+          <p role="alert">{errors.root.server.message}</p>
         )}
-        <button className={submitButton} type="submit" disabled={isSubmitting}>
+        <button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Signing in..." : "Login"}
         </button>
       </form>
-      <p className="mt-4 text-sm">
-        Don't have an account?{" "}
-        <Link to="/signup" className="text-blue-800 underline">
-          Sign up
-        </Link>
-      </p>
     </main>
   )
 }
+
+## 2) Link the pages together: "Don't have an account? Sign up" on login, and "Already have an account? Log in" on signup
+
+import { Link, useNavigate } from "react-router";
+
+<p className="mt-4 text-sm">
+  Don't have an account?{" "}
+  <Link to="/signup" className="text-blue-800 underline">
+    Sign up
+  </Link>
+</p>
+
+
+•	Log in with the wrong password. Supabase's error says "Invalid login credentials" without revealing whether the email or the password was wrong. That's deliberate, so attackers can't find out which emails are registered.
+•	Log in correctly, then open DevTools → Application → Local Storage. You'll find a key starting with sb- that contains your access_token and refresh_token. That's the session from the auth lesson, stored by supabase-js.
