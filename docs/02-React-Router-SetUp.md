@@ -96,3 +96,97 @@ const router = createBrowserRouter([
 - The flat route list from step 1 is now wrapped in a single outer route whose `element` holds the `<nav>` and `<Outlet />`, with the pages moved into its `children` array — turning it into a **layout route**.
 - `<Outlet />` is the placeholder inside that layout where the matched child route's element gets rendered, so the nav bar shows on every page since the layout wraps all child routes.
 - Testing: clicking each link should swap the content below the nav without a page refresh, and the `/does-not-exist` link should render `NotFoundPage` via the `*` route — confirming the whole route table works end-to-end.
+
+## 4) Move the layout into its own component
+
+Keeping the layout in `src/components/RootLayout.tsx` gives it a component boundary. That lets it use React hooks later, for example to show the signed-in user's name or handle logout. Since `App.tsx` is no longer used as the root component, it can be repurposed as the layout or removed.
+
+**`src/components/RootLayout.tsx`:**
+
+```tsx
+import { NavLink, Outlet } from 'react-router';
+
+export default function RootLayout() {
+  return (
+    <div>
+      <nav className="bg-gray-800 p-4">
+        <NavLink to="/" className={({ isActive }) =>
+            `mr-4 rounded px-3 py-2 ${
+              isActive
+                ? 'bg-gray-700 text-white'
+                : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+            }`
+          }>Dashboard</NavLink>
+        <NavLink to="/login" className={({ isActive }) =>
+            `mr-4 rounded px-3 py-2 ${
+              isActive
+                ? 'bg-gray-700 text-white'
+                : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+            }`
+          }>Login</NavLink>
+        <NavLink to="/signup" className={({ isActive }) =>
+            `mr-4 rounded px-3 py-2 ${
+              isActive
+                ? 'bg-gray-700 text-white'
+                : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+            }`
+          }>Sign Up</NavLink>
+        <NavLink to="/does-not-exist" className={({ isActive }) =>
+            `mr-4 rounded px-3 py-2 ${
+              isActive
+                ? 'bg-gray-700 text-white'
+                : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+            }`
+          }>404</NavLink>
+      </nav>
+      <Outlet />
+    </div>
+  );
+}
+```
+
+**Use the layout as the parent route in `main.tsx`:**
+
+```tsx
+import RootLayout from './components/RootLayout.tsx'
+
+const router = createBrowserRouter([
+  {
+    element: <RootLayout />,
+    children: [
+      { path: '/', element: <DashboardPage /> },
+      { path: '/login', element: <LoginPage /> },
+      { path: '/signup', element: <SignUpPage /> },
+      { path: '*', element: <NotFoundPage /> },
+    ],
+  },
+])
+```
+
+`RootLayout` renders the shared navigation, and `<Outlet />` renders the child page that matches the current URL.
+NavLink provides an isActive value you can use to choose Tailwind classes:
+
+## 5) TanStack Query Devtools
+
+The React Query Devtools panel helps inspect query state and cache while developing. Import it in `main.tsx` and render it inside `QueryClientProvider`, where it can access the query client.
+
+**Import:**
+
+```tsx
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+```
+
+**Render inside the provider:**
+
+```tsx
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+      <ReactQueryDevtools />
+    </QueryClientProvider>
+  </StrictMode>
+)
+```
+
+The devtools are intended for development use. You can conditionally render them with `import.meta.env.DEV` if you do not want them included in production.

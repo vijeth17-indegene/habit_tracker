@@ -58,19 +58,21 @@ alter table logs enable row level security;
 -- row level security (RLS) ensures that users can only access rows they are authorized to see, based on the policies defined for each table.
 
 
--- Example policy for profiles table:
-create policy "Allow logged-in users to select their own profile" on profiles
-    for select
-    using (id = auth.uid());
+-- Auto-create profiles with a trigger
+-- This is standard Supabase setup with a couple of security details that are easy to get wrong, so here's the SQL to run, followed by what each part does:
 
-create policy "Allow logged-in users to update their own profile" on profiles
-    for update
-    using (id = auth.uid());
+create function public.handle_new_user() 
+returns trigger 
+language plpgsql 
+security definer 
+set search_path = '' 
+as $$ 
+begin 
+    insert into public.profiles (id, full_name) 
+    values (new.id, new.raw_user_meta_data ->> 'full_name'); return new; 
+end; 
+$$; 
 
-create policy "Allow logged-in users to delete their own profile" on profiles
-    for delete
-    using (id = auth.uid());
-
-create policy "Allow logged-in users to insert their own profile" on profiles
-    for insert
-    with check (id = auth.uid());
+create trigger on_auth_user_created 
+    after insert on auth.users 
+    for each row execute procedure public.handle_new_user();
