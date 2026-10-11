@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signUpSchema, type SignUpFormValues } from "../lib/schemas/auth";
 
 import { supabase } from "../lib/supabase";
-import { useNavigate, Link } from "react-router";
+import { Link } from "react-router";
 
 import {
   mainClassName,
@@ -34,8 +34,6 @@ export default function SignUpPage() {
     }
   });
 
-  const navigate = useNavigate();
-
   const onSubmit = async ({
     fullName,
     email,
@@ -53,7 +51,6 @@ export default function SignUpPage() {
       setError("root.server", {message: error.message});
       return;
     }
-    navigate("/");
   };
 
   return (

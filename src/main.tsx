@@ -13,6 +13,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import AuthProvider from './components/AuthProvider.tsx'
+import ProtectedRoute from './components/ProtectedRoute.tsx'
+import GuestRoute from './components/GuestRoute.tsx'
 
 
 const queryClient = new QueryClient();
@@ -21,9 +23,19 @@ const router = createBrowserRouter([
   {
     element: <RootLayout />,
     children: [
-      { path: '/', element: <DashboardPage /> },
-      { path: '/login', element: <LoginPage /> },
-      { path: '/signup', element: <SignUpPage /> },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          { path: '/', element: <DashboardPage /> },
+        ],
+      },
+      {
+        element: <GuestRoute />,
+        children: [
+          { path: '/login', element: <LoginPage /> },
+          { path: '/signup', element: <SignUpPage /> },
+        ],
+      },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

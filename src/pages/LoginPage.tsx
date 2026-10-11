@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {loginSchema, type LoginFormValues} from "../lib/schemas/auth";
 import { supabase } from "../lib/supabase";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 
 import {
   mainClassName,
@@ -29,15 +29,12 @@ export default function LoginPage() {
     defaultValues: { email: "", password: ""},
   });
 
-  const navigate = useNavigate();
-
   const onSubmit = async({email, password}: LoginFormValues) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setError("root.server", { message: error.message });
       return;
     }
-    navigate("/");
   }
 
   return (
