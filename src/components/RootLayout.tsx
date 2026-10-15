@@ -24,6 +24,9 @@ export default function RootLayout(){
           <NavLink to="/">
             Dashboard
           </NavLink>
+          <NavLink to="/test">
+            Test
+          </NavLink>
 
           <div className="ml-auto flex flex-wrap items-center gap-4">
             {!loading && user && (
